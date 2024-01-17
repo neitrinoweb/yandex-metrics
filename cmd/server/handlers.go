@@ -20,18 +20,27 @@ func updateMetricHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Check for valid URL params
 	url := r.URL.RequestURI()
-	valid := ValidateMetricUpdateURL(url)
-	if !valid {
-		http.Error(w, "Bad Request", http.StatusBadRequest)
+	segments := strings.Split(strings.TrimPrefix(url, "/"), "/")
+
+	log.Printf("Checking request \"%s\" for valid data", url)
+	// Check if there's no more then 4 segments in url path
+	if len(segments) != 4 {
 		log.Printf("URL \"%s\" is not valid", url)
+		http.Error(w, "", http.StatusNotFound)
 		return
 	}
 
 	// Split URL request into params for metric update
-	segments := strings.Split(strings.TrimPrefix(url, "/"), "/")
 	metricType := segments[1]
 	metricName := segments[2]
 	metricValue := segments[3]
+
+	metricNamePattern := regexp.MustCompile(`^[a-zA-Z_:][a-zA-Z0-9_:]*$`)
+	if !metricNamePattern.MatchString(segments[2]) {
+		log.Printf("\"%s\" metric name is nov valid", segments[2])
+		http.Error(w, "Invalid metric name", http.StatusBadRequest)
+		return
+	}
 
 	// Update metric
 	switch metricType {
@@ -77,39 +86,39 @@ func updateMetricHandler(w http.ResponseWriter, r *http.Request) {
 //
 // Returns:
 //   - valid(bool): A boolean indicating whether the URL is valid or not
-func ValidateMetricUpdateURL(url string) bool {
-	segments := strings.Split(strings.TrimPrefix(url, "/"), "/")
-	log.Printf("Checking request \"%s\" for valid data", url)
+// func ValidateMetricUpdateURL(url string) bool {
+// 	segments := strings.Split(strings.TrimPrefix(url, "/"), "/")
+// 	log.Printf("Checking request \"%s\" for valid data", url)
 
-	// Check if there's no more then 4 segments in url path
-	if len(segments) != 4 {
-		log.Printf("URL \"%s\" is not valid", url)
-		return false
-	}
+// 	// Check if there's no more then 4 segments in url path
+// 	if len(segments) != 4 {
+// 		log.Printf("URL \"%s\" is not valid", url)
+// 		return false
+// 	}
 
-	// Check if the metric name is valid using regex pattern [a-zA-Z_:][a-zA-Z0-9_:]*
-	metricNamePattern := regexp.MustCompile(`^[a-zA-Z_:][a-zA-Z0-9_:]*$`)
-	if !metricNamePattern.MatchString(segments[2]) {
-		log.Printf("\"%s\" metric name is nov valid", segments[2])
-		return false
-	}
+// 	// Check if the metric name is valid using regex pattern [a-zA-Z_:][a-zA-Z0-9_:]*
+// 	metricNamePattern := regexp.MustCompile(`^[a-zA-Z_:][a-zA-Z0-9_:]*$`)
+// 	if !metricNamePattern.MatchString(segments[2]) {
+// 		log.Printf("\"%s\" metric name is nov valid", segments[2])
+// 		return false
+// 	}
 
-	// Check if the metric value is valid based on the metric type
-	if segments[1] == "counter" {
-		// Check if the metric value is a valid int64
-		_, err := strconv.ParseInt(segments[3], 10, 64)
-		if err != nil {
-			return false
-		}
-	} else if segments[1] == "gauge" {
-		// Check if the metric value is a valid float64
-		_, err := strconv.ParseFloat(segments[3], 64)
-		if err != nil {
-			return false
-		}
-	} else {
-		return false
-	}
+// 	// Check if the metric value is valid based on the metric type
+// 	if segments[1] == "counter" {
+// 		// Check if the metric value is a valid int64
+// 		_, err := strconv.ParseInt(segments[3], 10, 64)
+// 		if err != nil {
+// 			return false
+// 		}
+// 	} else if segments[1] == "gauge" {
+// 		// Check if the metric value is a valid float64
+// 		_, err := strconv.ParseFloat(segments[3], 64)
+// 		if err != nil {
+// 			return false
+// 		}
+// 	} else {
+// 		return false
+// 	}
 
-	return true
-}
+// 	return true
+// }
