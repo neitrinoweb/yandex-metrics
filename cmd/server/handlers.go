@@ -24,7 +24,7 @@ func updateMetricHandler(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("Checking request \"%s\" for valid data", url)
 	// Check if there's no more then 4 segments in url path
-	if len(segments) != 4 {
+	if len(segments) != 4 || segments[3] == "" {
 		log.Printf("URL \"%s\" is not valid", url)
 		http.Error(w, "", http.StatusNotFound)
 		return
