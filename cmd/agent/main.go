@@ -78,6 +78,9 @@ func main() {
 			{Name: "TotalAlloc", Value: float64(m.TotalAlloc)},
 		}
 
+		fmt.Println("1")
+		time.Sleep(5 * time.Second)
+
 		for _, metric := range gaugeMetrics {
 			hostURL.Path, _ = url.JoinPath("/update/", "gauge", "/", metric.Name, "/", strconv.FormatFloat(metric.Value, 'g', -1, 64))
 
@@ -90,7 +93,6 @@ func main() {
 			defer resp.Body.Close()
 		}
 
-		time.Sleep(5 * time.Second)
 	}
 
 }
