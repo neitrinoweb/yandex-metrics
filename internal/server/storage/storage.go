@@ -1,11 +1,13 @@
-package main
+package storage
 
 import (
 	"log"
 )
 
-// TODO:
-// - [ ] Универсальный интерфейс для MetricStorage
+type Storage interface {
+	UpdateGauge(name string, value float64) error
+	UpdateCounter(name string, value int64) error
+}
 
 // *********************************************
 // *                                           *
@@ -18,12 +20,14 @@ type InMemoryMetricStorage struct {
 	Gauges   map[string]float64
 }
 
+// Update gauge
 func (storage *InMemoryMetricStorage) UpdateGauge(name string, value float64) error {
 	storage.Gauges[name] = value
 	log.Printf("Metric \"%s\" of type 'Gauge' is updated with value %f", name, value)
 	return nil
 }
 
+// Update counter
 func (storage *InMemoryMetricStorage) UpdateCounter(name string, value int64) error {
 	if _, ok := storage.Counters[name]; !ok {
 		storage.Counters[name] = 0
@@ -33,6 +37,7 @@ func (storage *InMemoryMetricStorage) UpdateCounter(name string, value int64) er
 	return nil
 }
 
+// Init storage
 func InitInMemoryMetricStorage() *InMemoryMetricStorage {
 	return &InMemoryMetricStorage{
 		Counters: make(map[string]int64),

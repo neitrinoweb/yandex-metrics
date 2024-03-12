@@ -1,29 +1,24 @@
 package main
 
 import (
+	"internal/handlers"
+	"internal/storage"
 	"net/http"
 )
 
-// TODO: Move packages to internal
-// TODO: move server init to server.go
-var storage *InMemoryMetricStorage
-
 func main() {
-	// TODO: Init storage
-	storage = InitInMemoryMetricStorage()
+	storageMemory := storage.InitInMemoryMetricStorage()
 
-	// Test storage init data
-	storage.UpdateCounter("init_counter_metric", 0)
-	storage.UpdateGauge("init_gauge_metric", 0.0)
+	// Init data (storage pre-flight checks)
+	storageMemory.UpdateCounter("init_counter_metric", 0)
+	storageMemory.UpdateGauge("init_gauge_metric", 0.0)
 
-	// Init mux
+	// Endpoints
 	mux := http.NewServeMux()
-
-	// Metric update endpoints
-	mux.HandleFunc(`/update/`, updateMetricHandler)
+	mux.HandleFunc(`/update/`, handlers.UpdateMetric(storageMemory))
 
 	// Init server
-	err := http.ListenAndServe(`localhost:8080`, mux)
+	err := http.ListenAndServe(`:8080`, mux)
 	if err != nil {
 		panic(err)
 	}
