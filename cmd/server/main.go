@@ -1,9 +1,9 @@
 package main
 
 import (
-	"internal/handlers"
-	"internal/storage"
 	"net/http"
+	"yandex-metrics/internal/server/handlers"
+	"yandex-metrics/internal/server/storage"
 )
 
 func main() {
